@@ -17,6 +17,7 @@ namespace ContactForm
                         ContactManager.ViewContacts();
                         break;
                     case "2":
+                        ContactManager.SearchContact();
                         break;
                     case "3":
                         ContactManager.CreateContact();
@@ -26,6 +27,7 @@ namespace ContactForm
                     case "5":
                         break;
                     case "6":
+                    case "":
                         return;
                     default:
                         Console.WriteLine($"\"{choice}\" is invalid option\nPress any key to continue.");
