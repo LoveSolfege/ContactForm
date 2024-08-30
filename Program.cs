@@ -1,10 +1,12 @@
-﻿namespace ContactForm
+﻿using ContactForm.Services;
+using ContactForm.Utilities;
+
+namespace ContactForm
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-
             while(true) {
                 Console.Clear();
                 DisplayMenu();
