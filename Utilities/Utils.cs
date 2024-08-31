@@ -56,5 +56,20 @@ namespace ContactForm.Utilities {
 
             return str.ToUpper();
         }
+
+        /// <summary>
+        /// Clears console and puts given string on top of it
+        /// </summary>
+        /// <param name="header">string text to print</param>
+        public static void ClearConsolePlaceHeader(string header) {
+            Console.Clear();
+            Console.WriteLine(header);
+        }
+
+        public static void ClearConsolePlaceHeader(string header, ConsoleColor color) {
+            Console.Clear();
+            PrintColoredText(header, color);
+        }
+
     }
 }

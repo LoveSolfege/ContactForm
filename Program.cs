@@ -23,8 +23,10 @@ namespace ContactForm
                         ContactManager.CreateContact();
                         break;
                     case "4":
+                        ContactManager.EditContact();
                         break;
                     case "5":
+                        ContactManager.DeleteContact();
                         break;
                     case "6":
                     case "":
