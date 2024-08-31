@@ -1,83 +1,74 @@
 ﻿using ContactForm.Models;
 using ContactForm.Utilities;
 using Newtonsoft.Json;
+using System;
+using System.Reflection;
 
 namespace ContactForm.Services {
     internal static class ContactManager
     {
         const string _path = "contacts.json";
-        const int contactsPerPage = 5;
         public static void ViewContacts()
         {
             List<Contact> contacts = LoadContactsFromJson(_path);
-            (int totalContacts, int totalPages) = GetContactPageSizes(contacts, contactsPerPage);
-            int pageNumber = 1;
-            if (totalContacts == 0)
-            {
-                Console.Clear();
-                Console.WriteLine("You don't have any contacts.\nPress any key to return.");
-                Console.ReadKey();
-                return;
-            }
-            while (true)
-            {
-                Console.Clear();
-                Console.WriteLine($"Viewing contacts - Page {pageNumber}/{totalPages}\n");
-                PrintContactsFromList(contacts, contactsPerPage, pageNumber);
-
-                string choice = Utils.GetInput("Enter page number or 0 to return to menu: ");
-                if(choice == "0") {
-                    return;
-                }
-                else {
-                    pageNumber = SelectPage(totalPages, choice);
-                }
-            }
+            DisplayContactsWithPaging(contacts, "Viewing contacts");
         }
 
         public static void SearchContact() {
             List<Contact> contacts = LoadContactsFromJson(_path);
+            var contactFields = new Dictionary<string, string> {
+                { "number", "Id" },
+                { "name", "Name" },
+                { "email", "Email" },
+                { "mobile", "Phone" }
+            };
 
             while (true) {
                 Console.Clear();
-                Console.WriteLine("Contact searching\n You can search by [number], [name], [email], [mobile]\n");
-                string searchOption = Utils.GetInput("Select search type: ").ToLower();
-                switch (searchOption) {
-                    case "number":
+                Console.WriteLine("Contact searching\nYou can search by [number], [name], [email], [mobile]\n[exit] to exit\n");
 
-                        break;
-                    case "name":
+                string searchOption = Utils.GetInput("Search by? ", ConsoleColor.DarkCyan).ToLower();
 
-                        break;
-                    case "email":
+                if (searchOption == "exit" || string.IsNullOrEmpty(searchOption)) {
+                    return;
+                }
 
-                        break;
-                    case "mobile":
+                string searchTerm = Utils.GetInput("search for? ", ConsoleColor.DarkCyan);
 
-                        break;
-                    case "":
-                        return;
-                    default:
-                        Utils.PrintColoredText($"{searchOption} is not a valide search option\n try again or press Enter to return", ConsoleColor.Red);
-                        break;
+                if (contactFields.TryGetValue(searchOption, out var attribute)) {
+                    try {
+                        List<Contact> filteredContacts = GetContactByAtribute(contacts, attribute, searchTerm);
+
+                        if (filteredContacts.Any()) {
+                            DisplayContactsWithPaging(filteredContacts, $"Results for '{searchTerm}' in [{searchOption}]s");
+                        }
+                        else {
+                            Utils.PrintColoredText($"\nnothing found by {searchTerm} in any {attribute}s", ConsoleColor.DarkMagenta);
+                            Console.ReadKey();
+                        }
+                    }
+                    catch (Exception e) {
+                        Utils.PrintColoredText($"{e.Message}", ConsoleColor.Red);
+                        Console.ReadKey();
+                    }
+                }
+                else {
+                    Utils.PrintColoredText($"{searchOption} is not a valid search option\ntry again or press Enter to return", ConsoleColor.Red);
+                    Console.ReadKey();
                 }
             }
         }
 
-        public static void CreateContact()
-        {
+        public static void CreateContact() {
             bool creatingProcess = true;
-            while (creatingProcess)
-            {
+            while (creatingProcess) {
                 Console.Clear();
                 Console.WriteLine("Contact creation");
                 string name = Utils.GetInput("contact name: ");
                 string email = Utils.GetInput("contact email: ");
                 string phone = Utils.GetInput("contact phone: ");
-                try
-                {
-                    Contact contact = new Contact
-                    {
+                try {
+                    Contact contact = new Contact {
 
                         Id = JsonNextId(_path),
                         Name = name,
@@ -88,12 +79,64 @@ namespace ContactForm.Services {
                     Console.ReadKey();
                     creatingProcess = false;
                 }
-                catch (ArgumentException e)
-                {
+                catch (ArgumentException e) {
                     Utils.PrintColoredText($"Error: {e.Message}\nPress any key to continue.", ConsoleColor.Red);
                     Console.ReadKey();
                 }
             }
+        }
+
+        private static void DisplayContactsWithPaging(List<Contact> contacts, string header) {
+            const int contactsPerPage = 5;
+            int currentPage = 1;
+            (int totalContacts, int totalPages) = GetContactPageSizes(contacts, contactsPerPage);
+
+            if (totalContacts == 0) {
+                Console.Clear();
+                Utils.PrintColoredText("No contacts available.\nPress any key to return.", ConsoleColor.DarkMagenta);
+                Console.ReadKey();
+                return;
+            }
+
+            while (true) {
+                Console.Clear();
+                Console.WriteLine($"{header} - Page {currentPage}/{totalPages}\n");
+                PrintContactsFromList(contacts, contactsPerPage, currentPage);
+
+                string input = Utils.GetInput("Enter page number or 0 to return to menu: ");
+                if (input == "0") {
+                    break;
+                }
+                else {
+                    int selectedPage;
+                    if (int.TryParse(input, out selectedPage) && selectedPage >= 1 && selectedPage <= totalPages) {
+                        currentPage = selectedPage;
+                    }
+                    else {
+                        Utils.PrintColoredText($"Invalid page number. Please enter a number between 1 and {totalPages}.", ConsoleColor.Red);
+                        Console.ReadKey();
+                    }
+                }
+            }
+        }
+
+        private static List<Contact> GetContactByAtribute(List<Contact> contacts, string option, string prompt) {
+            PropertyInfo? property = typeof(Contact).GetProperty(option, BindingFlags.Public | BindingFlags.Instance);
+
+            if (property == null) {
+                throw new ArgumentException("Invalid property name", nameof(option));
+            }
+            return contacts.Where(c => {
+                var value = property.GetValue(c);
+                if(value is string stringValue) {
+                    return value != null && stringValue.IndexOf(prompt, StringComparison.OrdinalIgnoreCase) >= 0;
+                }
+                else if (value is int intValue && int.TryParse(prompt, out var searchInt)) {
+                    return intValue == searchInt;
+                }
+
+                return false;
+            }).ToList();
         }
 
         private static void SaveContacts(string path, Contact contact)
@@ -117,10 +160,6 @@ namespace ContactForm.Services {
             return JsonConvert.DeserializeObject<List<Contact>>(jsonData) ?? [];
         }
 
-        private static void GetContactByAtribute(List<Contact> contacts, string option, string prompt) {
-
-        }
-
         private static int JsonNextId(string jsonPath)
         {
             List<Contact> contacts = LoadContactsFromJson(jsonPath);
@@ -133,7 +172,7 @@ namespace ContactForm.Services {
             int end = Math.Min(start + contactsPerPage, totalContacts);
 
             for (int i = start; i < end; i++) {
-                Console.WriteLine($"Contact #{i + 1}");
+                Console.WriteLine($"Contact #{contacts[i].Id}");
                 Console.WriteLine($"Name: {contacts[i].Name}");
                 Console.WriteLine($"Email: {contacts[i].Email}");
                 Console.WriteLine($"Phone: {contacts[i].Phone}\n");
@@ -147,26 +186,6 @@ namespace ContactForm.Services {
 
             return (totalContacts, totalPages);
         }
-
-        private static int SelectPage(int totalPages, string input) {
-            if (int.TryParse(input, out int pageNumber)) {
-                if (pageNumber == 0) {
-                    throw new ArgumentOutOfRangeException();
-                }
-                if (pageNumber < 1 || pageNumber > totalPages) {
-                    Utils.PrintColoredText($"Invalid page number. Please enter a number between 1 and {totalPages}.", ConsoleColor.Red);
-                    pageNumber = 1;
-                    Console.ReadKey();
-                    return 1;
-                }
-                return pageNumber;
-            }
-            else {
-                Utils.PrintColoredText("Invalid input. Please enter a valid number.", ConsoleColor.Red);
-                Console.ReadKey();
-                return 1;
-            }
-        }
-
     }
+
 }
