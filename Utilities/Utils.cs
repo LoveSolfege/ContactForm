@@ -41,7 +41,6 @@ namespace ContactForm.Utilities {
         }
 
 
-
         /// <summary>
         /// makes firt letter of a string capital
         /// </summary>
@@ -65,11 +64,46 @@ namespace ContactForm.Utilities {
             Console.Clear();
             Console.WriteLine(header);
         }
-
+        /// <summary>
+        /// Clears console and puts colorized given string on top of it
+        /// </summary>
+        /// <param name="header">string text to print</param>
+        /// <param name="color">color from ConsoleColor enum</param>
         public static void ClearConsolePlaceHeader(string header, ConsoleColor color) {
             Console.Clear();
             PrintColoredText(header, color);
         }
 
+        /// <summary>
+        /// Clears console and puts given string on top of it with possible line break
+        /// </summary>
+        /// <param name="header">string text to print</param>
+        /// <param name="addLineBreak">line break bool</param>
+        public static void ClearConsolePlaceHeader(string header, bool addLineBreak) {
+            Console.Clear();
+            if (addLineBreak) {
+                Console.WriteLine(header + "\n");
+            }
+            else {
+                Console.WriteLine(header);
+            }
+            
+        }
+
+        /// <summary>
+        /// Clears console and puts colorized given string on top of it with possible line break
+        /// </summary>
+        /// <param name="header">string text to print</param>
+        /// <param name="color">color from ConsoleColor enum<</param>
+        /// <param name="addLineBreak">line break bool</param>
+        public static void ClearConsolePlaceHeader(string header, ConsoleColor color, bool addLineBreak) {
+            Console.Clear();
+            if (addLineBreak) {
+                PrintColoredText(header + "\n", color);
+            }
+            else {
+                PrintColoredText(header, color);
+            }
+        }
     }
 }

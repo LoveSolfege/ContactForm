@@ -31,8 +31,6 @@ namespace ContactForm.Services {
             }
         }
 
-        
-
         public static void CreateContact() {
             bool creatingProcess = true;
             while (creatingProcess) {
@@ -63,19 +61,54 @@ namespace ContactForm.Services {
             List<Contact> contacts = LoadContactsFromJson(_path);
             while (true) {
                 Utils.ClearConsolePlaceHeader("Contact Editor\n");
-                string selectedId = Utils.GetInput("");
+                
             }
         }
 
         public static void DeleteContact() {
             List<Contact> contacts = LoadContactsFromJson(_path);
             while (true) {
-                Utils.ClearConsolePlaceHeader("Contact Deletion");
-                string selectedId = Utils.GetInput("");
+                Utils.ClearConsolePlaceHeader("Contact Deletion", true);
+                string selectedId = Utils.GetInput("insert account # to delete: ", ConsoleColor.DarkCyan);
+                try {
+                    Contact searchResult = SearchById(contacts, selectedId);
+                    DisplaySingleContact(searchResult);
+                    string choice = Utils.GetInput("Proceed with deletion of this contact? yes/no: ", ConsoleColor.DarkRed).ToLower();
+                    if(choice == "yes" || choice == "y") {
+                        contacts.Remove(searchResult);
+                        ModifyConctacsJson(_path, contacts);
+                        Utils.ClearConsolePlaceHeader("Contact deleted successfuly", ConsoleColor.Green);
+                        Console.ReadKey();
+                        return;
+                    }
+                    else
+                    {
+                        Utils.ClearConsolePlaceHeader("Deletion canceled", ConsoleColor.Red);
+                        Console.ReadKey();
+                        return;
+                    }
+                }
+                catch(Exception){
+                    Utils.PrintColoredText($"No contact fond under number {selectedId}", ConsoleColor.Red);
+                    Console.ReadKey();
+                }
             }
         }
 
         //Helper methods below
+
+        public static Contact SearchById(List<Contact> contacts, string id) {
+            if(int.TryParse(id, out int index)) {
+                return contacts[index-1];
+            }
+            else {
+                throw new IndexOutOfRangeException();
+            }
+        }
+
+        public static void DisplaySingleContact(Contact contact) {
+            Console.WriteLine($"\nContact #{contact.Id}\nName: {contact.Name}\nEmail: {contact.Email}\nPhone: {contact.Phone}\n");
+        }
 
         public static void HandleSearch(List<Contact> contacts, string searchOption, string searchTerm) {
             var contactFields = new Dictionary<string, string> {
@@ -110,6 +143,10 @@ namespace ContactForm.Services {
         }
 
         private static void ModifyConctacsJson(string path, List<Contact> modifiedContacts) {
+            for (int i = 0; i < modifiedContacts.Count; i++) {
+                modifiedContacts[i].Id = i+1;
+            }
+
             string json = JsonConvert.SerializeObject(modifiedContacts, Formatting.Indented);
             File.WriteAllText(path, json);
 
@@ -132,12 +169,11 @@ namespace ContactForm.Services {
                 PrintContactsFromList(contacts, contactsPerPage, currentPage);
 
                 string input = Utils.GetInput("Enter page number or 0 to return to menu: ");
-                if (input == "0") {
+                if (input == "0" || input == "exit" || input == "confirm") {
                     break;
                 }
                 else {
-                    int selectedPage;
-                    if (int.TryParse(input, out selectedPage) && selectedPage >= 1 && selectedPage <= totalPages) {
+                    if (int.TryParse(input, out int selectedPage) && selectedPage >= 1 && selectedPage <= totalPages) {
                         currentPage = selectedPage;
                     }
                     else {
@@ -200,10 +236,7 @@ namespace ContactForm.Services {
             int end = Math.Min(start + contactsPerPage, totalContacts);
 
             for (int i = start; i < end; i++) {
-                Console.WriteLine($"Contact #{contacts[i].Id}");
-                Console.WriteLine($"Name: {contacts[i].Name}");
-                Console.WriteLine($"Email: {contacts[i].Email}");
-                Console.WriteLine($"Phone: {contacts[i].Phone}\n");
+                DisplaySingleContact(contacts[i]);
             }
 
         }
@@ -214,7 +247,6 @@ namespace ContactForm.Services {
 
             return (totalContacts, totalPages);
         }
-        
         
     }
 
