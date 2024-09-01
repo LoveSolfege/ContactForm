@@ -17,7 +17,7 @@ namespace ContactForm.Services {
             List<Contact> contacts = LoadContactsFromJson(_path);
 
             while (true) {
-                Utils.ClearConsolePlaceHeader("Contact searching\nYou can search by [number], [name], [email], [mobile]\n[exit] to exit\n");
+                Utils.ClearConsolePlaceHeader("Contact searching\nYou can search by [number], [name], [email], [mobile]\n[exit] to exit", true);
 
                 string searchOption = Utils.GetInput("Search by? ", ConsoleColor.DarkCyan).ToLower();
 
@@ -60,7 +60,7 @@ namespace ContactForm.Services {
         public static void EditContact() {
             List<Contact> contacts = LoadContactsFromJson(_path);
             while (true) {
-                Utils.ClearConsolePlaceHeader("Contact Editor\n");
+                Utils.ClearConsolePlaceHeader("Contact Editor", true);
                 
             }
         }
@@ -179,7 +179,7 @@ namespace ContactForm.Services {
             }
 
             while (true) {
-                Utils.ClearConsolePlaceHeader($"{header} - Page {currentPage}/{totalPages}\n");
+                Utils.ClearConsolePlaceHeader($"{header} - Page {currentPage}/{totalPages}");
                 PrintContactsFromList(contacts, contactsPerPage, currentPage);
 
                 string input = Utils.GetInput("Enter page number or 0 to return to menu: ");

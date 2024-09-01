@@ -62,6 +62,7 @@ namespace ContactForm.Utilities {
         /// <param name="header">string text to print</param>
         public static void ClearConsolePlaceHeader(string header) {
             Console.Clear();
+            Console.Write("\x1b[3J");
             Console.WriteLine(header);
         }
         /// <summary>
@@ -71,6 +72,7 @@ namespace ContactForm.Utilities {
         /// <param name="color">color from ConsoleColor enum</param>
         public static void ClearConsolePlaceHeader(string header, ConsoleColor color) {
             Console.Clear();
+            Console.Write("\x1b[3J");
             PrintColoredText(header, color);
         }
 
@@ -81,6 +83,7 @@ namespace ContactForm.Utilities {
         /// <param name="addLineBreak">line break bool</param>
         public static void ClearConsolePlaceHeader(string header, bool addLineBreak) {
             Console.Clear();
+            Console.Write("\x1b[3J");
             if (addLineBreak) {
                 Console.WriteLine(header + "\n");
             }
@@ -98,6 +101,7 @@ namespace ContactForm.Utilities {
         /// <param name="addLineBreak">line break bool</param>
         public static void ClearConsolePlaceHeader(string header, ConsoleColor color, bool addLineBreak) {
             Console.Clear();
+            Console.Write("\x1b[3J");
             if (addLineBreak) {
                 PrintColoredText(header + "\n", color);
             }
