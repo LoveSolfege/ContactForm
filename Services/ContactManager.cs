@@ -75,8 +75,9 @@ namespace ContactForm.Services {
                     DisplaySingleContact(searchResult);
                     string choice = Utils.GetInput("Proceed with deletion of this contact? yes/no: ", ConsoleColor.DarkRed).ToLower();
                     if(choice == "yes" || choice == "y") {
+                        int deletedId = searchResult.Id;
                         contacts.Remove(searchResult);
-                        ModifyConctacsJson(_path, contacts);
+                        ModifyConctacsJson(_path, contacts, deletedId);
                         Utils.ClearConsolePlaceHeader("Contact deleted successfuly", ConsoleColor.Green);
                         Console.ReadKey();
                         return;
@@ -142,15 +143,28 @@ namespace ContactForm.Services {
             }
         }
 
-        private static void ModifyConctacsJson(string path, List<Contact> modifiedContacts) {
-            for (int i = 0; i < modifiedContacts.Count; i++) {
-                modifiedContacts[i].Id = i+1;
+        private static void ModifyConctacsJson(string path, List<Contact> modifiedContacts, int deletedId) {
+
+            if (deletedId > 0) {
+                for (int i = deletedId - 1; i < modifiedContacts.Count; i++) {
+                    modifiedContacts[i].Id = i + 1;
+                }
             }
 
             string json = JsonConvert.SerializeObject(modifiedContacts, Formatting.Indented);
             File.WriteAllText(path, json);
 
             Utils.PrintColoredText("Contacts modified successfully", ConsoleColor.Yellow);
+        }
+
+        private static void SaveContacts(string path, Contact contact) {
+            List<Contact> contacts = LoadContactsFromJson(path);
+            contacts.Add(contact);
+
+            string json = JsonConvert.SerializeObject(contacts, Formatting.Indented);
+            File.WriteAllText(path, json);
+
+            Utils.PrintColoredText("Contact added successfully.", ConsoleColor.Green);
         }
 
         private static void DisplayContactsWithPaging(List<Contact> contacts, string header) {
@@ -203,17 +217,6 @@ namespace ContactForm.Services {
             }).ToList();
         }
 
-        private static void SaveContacts(string path, Contact contact)
-        {
-            List<Contact> contacts = LoadContactsFromJson(path);
-            contacts.Add(contact);
-
-            string json = JsonConvert.SerializeObject(contacts, Formatting.Indented);
-            File.WriteAllText(path, json);
-
-            Utils.PrintColoredText("Contact added successfully.", ConsoleColor.Green);
-        }
-
         private static List<Contact> LoadContactsFromJson(string path)
         {
             if (!File.Exists(path))
@@ -227,7 +230,7 @@ namespace ContactForm.Services {
         private static int JsonNextId(string jsonPath)
         {
             List<Contact> contacts = LoadContactsFromJson(jsonPath);
-            return contacts.Count == 0 ? 1 : contacts[^1].Id + 1;
+            return contacts.Count == 0 ? 1 : contacts[^1].Id;
         }
 
         private static void PrintContactsFromList(List<Contact> contacts, int contactsPerPage, int pageNumber) {
@@ -249,5 +252,4 @@ namespace ContactForm.Services {
         }
         
     }
-
 }
