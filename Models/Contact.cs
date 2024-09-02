@@ -9,7 +9,15 @@ namespace ContactForm.Models
         private string _name = string.Empty;
         private string _email = string.Empty;
         private string _phone = string.Empty;
-        public int Id { get; set; }
+        public int Id { get;  set; }
+
+
+        public Contact(int id, string name, string email, string phone) {
+            Id = id;
+            Name = name;
+            Email = email;
+            Phone = phone;
+        }
 
         public string Name
         {

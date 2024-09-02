@@ -39,13 +39,10 @@ namespace ContactForm.Services {
                 string email = Utils.GetInput("contact email: ");
                 string phone = Utils.GetInput("contact phone: ");
                 try {
-                    Contact contact = new Contact {
+                    Contact contact = new Contact(
+                        JsonNextId(_path), name, email, phone
+                    );
 
-                        Id = JsonNextId(_path),
-                        Name = name,
-                        Email = email,
-                        Phone = phone
-                    };
                     SaveContacts(_path, contact);
                     Console.ReadKey();
                     creatingProcess = false;
@@ -61,7 +58,28 @@ namespace ContactForm.Services {
             List<Contact> contacts = LoadContactsFromJson(_path);
             while (true) {
                 Utils.ClearConsolePlaceHeader("Contact Editor", true);
-                
+                string selectedId = Utils.GetInput("insert contact # to eddit: ", ConsoleColor.DarkCyan);
+                try {
+                    Contact searchResult = SearchById(contacts, selectedId);
+                    DisplaySingleContact(searchResult);
+                    string choice = Utils.GetInput("Proceed with edition of this contact? yes/no: ", ConsoleColor.DarkRed).ToLower();
+                    if (choice == "yes" || choice == "y") {
+                        contacts = HandleEdition(searchResult, contacts, selectedId);
+                        ModifyConctacsJson(_path, contacts, 0);
+                        Utils.ClearConsolePlaceHeader("Contact modified successfuly", ConsoleColor.Green);
+                        Console.ReadKey();
+                        return;
+                    }
+                    else {
+                        Utils.ClearConsolePlaceHeader("edition canceled", ConsoleColor.Red);
+                        Console.ReadKey();
+                        return;
+                    }
+                }
+                catch (Exception) {
+                    Utils.PrintColoredText($"No contact fond under number {selectedId}", ConsoleColor.Red);
+                    Console.ReadKey();
+                }
             }
         }
 
@@ -69,7 +87,7 @@ namespace ContactForm.Services {
             List<Contact> contacts = LoadContactsFromJson(_path);
             while (true) {
                 Utils.ClearConsolePlaceHeader("Contact Deletion", true);
-                string selectedId = Utils.GetInput("insert account # to delete: ", ConsoleColor.DarkCyan);
+                string selectedId = Utils.GetInput("insert contact # to delete: ", ConsoleColor.DarkCyan);
                 try {
                     Contact searchResult = SearchById(contacts, selectedId);
                     DisplaySingleContact(searchResult);
@@ -98,7 +116,27 @@ namespace ContactForm.Services {
 
         //Helper methods below
 
-        public static Contact SearchById(List<Contact> contacts, string id) {
+        private static List<Contact> HandleEdition(Contact contact, List<Contact> contacts, string selectedId) {
+            int Id = int.Parse(selectedId);
+
+            (int contactId, string name, string email, string phone) oldData = (contact.Id,  contact.Name, contact.Email, contact.Phone);
+
+            Utils.ClearConsolePlaceHeader($"Editing contact #{contact.Id}\nLeave blanks to keep old values", ConsoleColor.DarkCyan, true);
+
+            string? newName = GetUpdatedValue(oldData.name, "Name");
+            string? newEmail = GetUpdatedValue(oldData.email, "Email");
+            string? newPhone = GetUpdatedValue(oldData.phone, "Phone");
+
+            contacts[Id - 1] = new Contact(oldData.contactId, newName, newEmail, newPhone);
+            return contacts;
+        }
+
+        private static string GetUpdatedValue(string oldValue, string fieldName) {
+            string? newValue = Utils.GetInput($"Old {fieldName} '{oldValue}' provide new {fieldName}: ", ConsoleColor.DarkYellow);
+            return string.IsNullOrWhiteSpace(newValue) ? oldValue : newValue;
+        }
+
+        private static Contact SearchById(List<Contact> contacts, string id) {
             if(int.TryParse(id, out int index)) {
                 return contacts[index-1];
             }
@@ -107,11 +145,11 @@ namespace ContactForm.Services {
             }
         }
 
-        public static void DisplaySingleContact(Contact contact) {
+        private static void DisplaySingleContact(Contact contact) {
             Console.WriteLine($"\nContact #{contact.Id}\nName: {contact.Name}\nEmail: {contact.Email}\nPhone: {contact.Phone}\n");
         }
 
-        public static void HandleSearch(List<Contact> contacts, string searchOption, string searchTerm) {
+        private static void HandleSearch(List<Contact> contacts, string searchOption, string searchTerm) {
             var contactFields = new Dictionary<string, string> {
                 { "number", "Id" },
                 { "name", "Name" },
