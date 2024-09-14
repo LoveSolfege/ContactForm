@@ -36,12 +36,7 @@
         public static void ClearConsolePlaceHeader(string header, ConsoleColor color = ConsoleColor.Gray, bool addLineBreak = false) {
             Console.Clear();
             Console.Write("\x1b[3J");
-            if (addLineBreak) {
-                PrintColoredText(header + "\n", color);
-            }
-            else {
-                PrintColoredText(header, color);
-            }
+            PrintColoredText(header + (addLineBreak ? "\n" : string.Empty), color);
         }
     }
 }
