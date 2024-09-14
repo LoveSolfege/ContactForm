@@ -1,26 +1,13 @@
-﻿using static System.Net.Mime.MediaTypeNames;
-
-namespace ContactForm.Utilities {
+﻿namespace ContactForm.Utilities {
     internal static class Utils
     {
-        /// <summary>
-        /// Read user input after displaying custom text
-        /// </summary>
-        /// <param name="prompt">text to display</param>
-        /// <returns>read text as string</returns>
-        public static string GetInput(string prompt)
-        {
-            Console.Write(prompt);
-            return Console.ReadLine() ?? string.Empty;
-        }
-
         /// <summary>
         /// Read user input after displaying custom text with specified color
         /// </summary>
         /// <param name="prompt">text to display</param>
         /// <param name="color">color from ConsoleColor enum</param>
         /// <returns></returns>
-        public static string GetInput(string prompt, ConsoleColor color) {
+        public static string GetInput(string prompt, ConsoleColor color = ConsoleColor.Black) {
             Console.ForegroundColor = color;
             Console.Write(prompt);
             Console.ResetColor();
@@ -57,49 +44,12 @@ namespace ContactForm.Utilities {
         }
 
         /// <summary>
-        /// Clears console and puts given string on top of it
-        /// </summary>
-        /// <param name="header">string text to print</param>
-        public static void ClearConsolePlaceHeader(string header) {
-            Console.Clear();
-            Console.Write("\x1b[3J");
-            Console.WriteLine(header);
-        }
-        /// <summary>
-        /// Clears console and puts colorized given string on top of it
-        /// </summary>
-        /// <param name="header">string text to print</param>
-        /// <param name="color">color from ConsoleColor enum</param>
-        public static void ClearConsolePlaceHeader(string header, ConsoleColor color) {
-            Console.Clear();
-            Console.Write("\x1b[3J");
-            PrintColoredText(header, color);
-        }
-
-        /// <summary>
-        /// Clears console and puts given string on top of it with possible line break
-        /// </summary>
-        /// <param name="header">string text to print</param>
-        /// <param name="addLineBreak">line break bool</param>
-        public static void ClearConsolePlaceHeader(string header, bool addLineBreak) {
-            Console.Clear();
-            Console.Write("\x1b[3J");
-            if (addLineBreak) {
-                Console.WriteLine(header + "\n");
-            }
-            else {
-                Console.WriteLine(header);
-            }
-            
-        }
-
-        /// <summary>
         /// Clears console and puts colorized given string on top of it with possible line break
         /// </summary>
         /// <param name="header">string text to print</param>
         /// <param name="color">color from ConsoleColor enum<</param>
         /// <param name="addLineBreak">line break bool</param>
-        public static void ClearConsolePlaceHeader(string header, ConsoleColor color, bool addLineBreak) {
+        public static void ClearConsolePlaceHeader(string header, ConsoleColor color = ConsoleColor.Black, bool addLineBreak = false) {
             Console.Clear();
             Console.Write("\x1b[3J");
             if (addLineBreak) {

@@ -17,7 +17,7 @@ namespace ContactForm.Services {
             List<Contact> contacts = LoadContactsFromJson(_path);
 
             while (true) {
-                Utils.ClearConsolePlaceHeader("Contact searching\nYou can search by [number], [name], [email], [mobile]\n[exit] to exit", true);
+                Utils.ClearConsolePlaceHeader("Contact searching\nYou can search by [number], [name], [email], [mobile]\n[exit] to exit", addLineBreak: true);
 
                 string searchOption = Utils.GetInput("Search by? ", ConsoleColor.DarkCyan).ToLower();
 
@@ -57,7 +57,7 @@ namespace ContactForm.Services {
         public static void EditContact() {
             List<Contact> contacts = LoadContactsFromJson(_path);
             while (true) {
-                Utils.ClearConsolePlaceHeader("Contact Editor", true);
+                Utils.ClearConsolePlaceHeader("Contact Editor", addLineBreak: true);
                 string selectedId = Utils.GetInput("insert contact # to eddit: ", ConsoleColor.DarkCyan);
                 try {
                     Contact searchResult = SearchById(contacts, selectedId);
@@ -86,7 +86,7 @@ namespace ContactForm.Services {
         public static void DeleteContact() {
             List<Contact> contacts = LoadContactsFromJson(_path);
             while (true) {
-                Utils.ClearConsolePlaceHeader("Contact Deletion", true);
+                Utils.ClearConsolePlaceHeader("Contact Deletion", addLineBreak: true);
                 string selectedId = Utils.GetInput("insert contact # to delete: ", ConsoleColor.DarkCyan);
                 try {
                     Contact searchResult = SearchById(contacts, selectedId);
